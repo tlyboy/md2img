@@ -1,9 +1,11 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
 import { Button } from './ui/button'
 
 export function ModeToggle() {
+  const t = useTranslations('theme')
   const { resolvedTheme, setTheme } = useTheme()
 
   function toggleDark(event: React.MouseEvent<HTMLButtonElement>) {
@@ -58,7 +60,7 @@ export function ModeToggle() {
       variant="secondary"
       size="icon"
       className="size-8"
-      title="切换深色模式"
+      title={t('toggle')}
       onClick={toggleDark}
     >
       <svg

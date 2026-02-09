@@ -1,11 +1,11 @@
-# md2img
+# md2any
 
-🛠️ md2img
+Markdown to PNG/JPG/PDF converter
 
 ## Install
 
 ```bash
-git clone https://github.com/tlyboy/md2img.git
+git clone https://github.com/tlyboy/md2any.git
 ```
 
 ## Usage

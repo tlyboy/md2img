@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "title": "md2any",
+    "description": "Markdown to PNG/JPG/PDF converter"
+  },
+  "editor": {
+    "edit": "Edit",
+    "preview": "Preview",
+    "placeholder": "Type your Markdown here..."
+  },
+  "export": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "download": "Download"
+  },
+  "theme": {
+    "toggle": "Toggle theme"
+  }
+}

@@ -1,11 +1,13 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { ModeToggle } from '@/components/mode-toggle'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { MarkdownPreview } from '@/components/markdown-preview'
 import { ExportButton } from '@/components/export-button'
+import { LocaleSwitcher } from '@/components/locale-switcher'
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -14,9 +16,53 @@ import {
 
 type TabType = 'editor' | 'preview'
 
-const defaultMarkdown = `# 欢迎使用 md2img
+const defaultMarkdownEn = `# Welcome to md2any
 
-这是一个 **Markdown** 转 *PNG* 的工具。
+This is a **Markdown** to *PNG/JPG/PDF* converter.
+
+## Features
+
+- Live preview
+- Syntax highlighting
+- Math formula support
+- Mermaid diagrams
+- Export as PNG, JPG or PDF
+
+## Code Example
+
+\`\`\`typescript
+function hello(name: string) {
+  console.log(\`Hello, \${name}!\`)
+}
+\`\`\`
+
+## Math Formula
+
+Inline: $E = mc^2$
+
+Block:
+
+$$
+\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}
+$$
+
+## Mermaid Diagram
+
+\`\`\`mermaid
+graph TD
+    A[Start] --> B{Valid?}
+    B -->|Yes| C[Process Data]
+    B -->|No| D[Show Error]
+    C --> E[End]
+    D --> E
+\`\`\`
+
+> Start editing Markdown on the left, and see the live preview on the right!
+`
+
+const defaultMarkdownZh = `# 欢迎使用 md2any
+
+这是一个 **Markdown** 转 *PNG/JPG/PDF* 的工具。
 
 ## 功能特性
 
@@ -24,7 +70,7 @@ const defaultMarkdown = `# 欢迎使用 md2img
 - 代码高亮
 - 数学公式支持
 - Mermaid 图表
-- 导出为 PNG 图片
+- 导出为 PNG、JPG 或 PDF
 
 ## 代码示例
 
@@ -59,19 +105,23 @@ graph TD
 `
 
 export default function Home(): React.ReactNode {
-  const [markdown, setMarkdown] = useState(defaultMarkdown)
+  const locale = useLocale()
+  const t = useTranslations('editor')
+  const [markdown, setMarkdown] = useState(
+    locale === 'zh-CN' ? defaultMarkdownZh : defaultMarkdownEn
+  )
   const [activeTab, setActiveTab] = useState<TabType>('editor')
   const previewRef = useRef<HTMLDivElement>(null)
 
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center justify-between border-b px-3 py-2 md:px-4">
-        <h1 className="text-lg font-semibold">🛠️ md2img</h1>
+        <h1 className="text-lg font-semibold">md2any</h1>
         <div className="flex items-center gap-2">
           <ExportButton targetRef={previewRef} />
           <Button variant="secondary" size="icon" className="size-8" asChild>
             <a
-              href="https://github.com/tlyboy/md2img"
+              href="https://github.com/tlyboy/md2any"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -83,11 +133,12 @@ export default function Home(): React.ReactNode {
               </svg>
             </a>
           </Button>
+          <LocaleSwitcher />
           <ModeToggle />
         </div>
       </header>
 
-      {/* 移动端标签页切换 */}
+      {/* Mobile tab switcher */}
       <div className="flex border-b md:hidden">
         <button
           onClick={() => setActiveTab('editor')}
@@ -97,7 +148,7 @@ export default function Home(): React.ReactNode {
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          编辑
+          {t('edit')}
         </button>
         <button
           onClick={() => setActiveTab('preview')}
@@ -107,11 +158,11 @@ export default function Home(): React.ReactNode {
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          预览
+          {t('preview')}
         </button>
       </div>
 
-      {/* 移动端内容区域 */}
+      {/* Mobile content */}
       <div className="min-h-0 flex-1 md:hidden">
         {activeTab === 'editor' ? (
           <MarkdownEditor value={markdown} onChange={setMarkdown} />
@@ -120,7 +171,7 @@ export default function Home(): React.ReactNode {
         )}
       </div>
 
-      {/* 桌面端可调整面板 */}
+      {/* Desktop resizable panels */}
       <div className="hidden min-h-0 flex-1 md:block">
         <ResizablePanelGroup orientation="horizontal" className="h-full">
           <ResizablePanel defaultSize={50} minSize={30}>

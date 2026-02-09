@@ -1,10 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { toBlob } from 'html-to-image'
+import { useTranslations } from 'next-intl'
+import { toBlob, toJpeg } from 'html-to-image'
 import { saveAs } from 'file-saver'
-import { Check, Copy, Download, Loader2 } from 'lucide-react'
+import { Check, ChevronDown, Copy, Download, FileText, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface ExportButtonProps {
   targetRef: React.RefObject<HTMLDivElement | null>
@@ -91,7 +98,7 @@ function restoreAfterExport(state: {
   })
 }
 
-async function captureBlob(element: HTMLDivElement): Promise<Blob | null> {
+async function capturePngBlob(element: HTMLDivElement): Promise<Blob | null> {
   const state = prepareForExport(element)
   try {
     return await toBlob(element, getExportOptions())
@@ -100,25 +107,64 @@ async function captureBlob(element: HTMLDivElement): Promise<Blob | null> {
   }
 }
 
+async function captureJpegBlob(element: HTMLDivElement): Promise<Blob | null> {
+  const state = prepareForExport(element)
+  try {
+    const dataUrl = await toJpeg(element, { ...getExportOptions(), quality: 0.92 })
+    const res = await fetch(dataUrl)
+    return await res.blob()
+  } finally {
+    restoreAfterExport(state)
+  }
+}
+
+
 export function ExportButton({ targetRef }: ExportButtonProps): React.ReactNode {
+  const t = useTranslations('export')
   const [isExporting, setIsExporting] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  async function handleExport(): Promise<void> {
+  async function handleExport(format: 'png' | 'jpg'): Promise<void> {
     if (!targetRef.current) return
 
     setIsExporting(true)
-    const blob = await captureBlob(targetRef.current)
-    if (blob) saveAs(blob, `markdown-${Date.now()}.png`)
+    const blob = format === 'jpg'
+      ? await captureJpegBlob(targetRef.current)
+      : await capturePngBlob(targetRef.current)
+    if (blob) saveAs(blob, `markdown-${Date.now()}.${format}`)
     setIsExporting(false)
+  }
+
+  function handlePrintPdf(): void {
+    if (!targetRef.current) return
+
+    // Clone the already-rendered preview (includes Mermaid SVGs, KaTeX, Shiki)
+    const clone = targetRef.current.cloneNode(true) as HTMLDivElement
+    clone.style.padding = '2rem'
+
+    // Hide all existing body children
+    const siblings = Array.from(document.body.children) as HTMLElement[]
+    siblings.forEach((el) => (el.dataset.printHidden = el.style.display))
+    siblings.forEach((el) => (el.style.display = 'none'))
+
+    // Insert clone at body level and print
+    document.body.appendChild(clone)
+    window.print()
+
+    // Restore
+    document.body.removeChild(clone)
+    siblings.forEach((el) => {
+      el.style.display = el.dataset.printHidden || ''
+      delete el.dataset.printHidden
+    })
   }
 
   async function handleCopy(): Promise<void> {
     if (!targetRef.current) return
 
     setIsCopying(true)
-    const blob = await captureBlob(targetRef.current)
+    const blob = await capturePngBlob(targetRef.current)
     if (blob) {
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob }),
@@ -144,19 +190,32 @@ export function ExportButton({ targetRef }: ExportButtonProps): React.ReactNode 
         variant="ghost"
       >
         {renderCopyIcon()}
-        {copied ? '已复制' : '复制'}
+        {copied ? t('copied') : t('copy')}
       </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="sm" disabled={isExporting}>
+            {isExporting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            {t('download')}
+            <ChevronDown className="ml-1 h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={() => handleExport('png')}>PNG</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExport('jpg')}>JPG</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <Button
-        onClick={handleExport}
-        disabled={isExporting}
+        onClick={() => handlePrintPdf()}
         size="sm"
+        variant="secondary"
       >
-        {isExporting ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <Download className="mr-2 h-4 w-4" />
-        )}
-        下载
+        <FileText className="mr-2 h-4 w-4" />
+        PDF
       </Button>
     </div>
   )

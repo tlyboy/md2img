@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "title": "md2any",
+    "description": "Markdown 转 PNG/JPG/PDF 工具"
+  },
+  "editor": {
+    "edit": "编辑",
+    "preview": "预览",
+    "placeholder": "在这里输入 Markdown..."
+  },
+  "export": {
+    "copy": "复制",
+    "copied": "已复制",
+    "download": "下载"
+  },
+  "theme": {
+    "toggle": "切换深色模式"
+  }
+}
