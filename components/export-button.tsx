@@ -4,7 +4,14 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { toBlob, toJpeg } from 'html-to-image'
 import { saveAs } from 'file-saver'
-import { Check, ChevronDown, Copy, Download, FileText, Loader2 } from 'lucide-react'
+import {
+  Check,
+  ChevronDown,
+  Copy,
+  Download,
+  FileText,
+  Loader2,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -34,7 +41,7 @@ function prepareForExport(element: HTMLDivElement): {
   const hiddenEmptyLines: HTMLElement[] = []
 
   const codeBlocks = element.querySelectorAll(
-    '[data-streamdown="code-block-body"] code'
+    '[data-streamdown="code-block-body"] code',
   )
   codeBlocks.forEach((code) => {
     // 隐藏末尾空行（html-to-image 不支持 :has() 选择器）
@@ -56,7 +63,7 @@ function prepareForExport(element: HTMLDivElement): {
 
     // 添加行号
     const visibleLines = Array.from(lines).filter(
-      (line) => (line as HTMLElement).style.display !== 'none'
+      (line) => (line as HTMLElement).style.display !== 'none',
     )
     visibleLines.forEach((line, index) => {
       const lineNumber = document.createElement('span')
@@ -98,15 +105,23 @@ function restoreAfterExport(state: {
   })
 }
 
-async function waitForRender(element: HTMLDivElement, timeout = 10000): Promise<void> {
-  const mermaidBlocks = Array.from(element.querySelectorAll('[data-streamdown="mermaid-block"]'))
+async function waitForRender(
+  element: HTMLDivElement,
+  timeout = 10000,
+): Promise<void> {
+  const mermaidBlocks = Array.from(
+    element.querySelectorAll('[data-streamdown="mermaid-block"]'),
+  )
   if (mermaidBlocks.length === 0) return
 
-  const isRendered = (block: Element) => !!block.querySelector('[data-streamdown="mermaid"]')
+  const isRendered = (block: Element) =>
+    !!block.querySelector('[data-streamdown="mermaid"]')
 
   if (mermaidBlocks.every(isRendered)) return
 
-  const scrollContainer = element.closest('.overflow-auto') as HTMLElement | null
+  const scrollContainer = element.closest(
+    '.overflow-auto',
+  ) as HTMLElement | null
   if (!scrollContainer) return
 
   const savedScroll = scrollContainer.scrollTop
@@ -140,7 +155,10 @@ async function captureJpegBlob(element: HTMLDivElement): Promise<Blob | null> {
   await waitForRender(element)
   const state = prepareForExport(element)
   try {
-    const dataUrl = await toJpeg(element, { ...getExportOptions(), quality: 0.92 })
+    const dataUrl = await toJpeg(element, {
+      ...getExportOptions(),
+      quality: 0.92,
+    })
     const res = await fetch(dataUrl)
     return await res.blob()
   } finally {
@@ -148,8 +166,9 @@ async function captureJpegBlob(element: HTMLDivElement): Promise<Blob | null> {
   }
 }
 
-
-export function ExportButton({ targetRef }: ExportButtonProps): React.ReactNode {
+export function ExportButton({
+  targetRef,
+}: ExportButtonProps): React.ReactNode {
   const t = useTranslations('export')
   const [isExporting, setIsExporting] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
@@ -159,9 +178,10 @@ export function ExportButton({ targetRef }: ExportButtonProps): React.ReactNode 
     if (!targetRef.current) return
 
     setIsExporting(true)
-    const blob = format === 'jpg'
-      ? await captureJpegBlob(targetRef.current)
-      : await capturePngBlob(targetRef.current)
+    const blob =
+      format === 'jpg'
+        ? await captureJpegBlob(targetRef.current)
+        : await capturePngBlob(targetRef.current)
     if (blob) saveAs(blob, `markdown-${Date.now()}.${format}`)
     setIsExporting(false)
   }
@@ -235,15 +255,15 @@ export function ExportButton({ targetRef }: ExportButtonProps): React.ReactNode 
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => handleExport('png')}>PNG</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleExport('jpg')}>JPG</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExport('png')}>
+            PNG
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExport('jpg')}>
+            JPG
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Button
-        onClick={() => handlePrintPdf()}
-        size="sm"
-        variant="secondary"
-      >
+      <Button onClick={() => handlePrintPdf()} size="sm" variant="secondary">
         <FileText className="mr-2 h-4 w-4" />
         PDF
       </Button>

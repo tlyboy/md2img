@@ -108,7 +108,7 @@ export default function Home(): React.ReactNode {
   const locale = useLocale()
   const t = useTranslations('editor')
   const [markdown, setMarkdown] = useState(
-    locale === 'zh-CN' ? defaultMarkdownZh : defaultMarkdownEn
+    locale === 'zh-CN' ? defaultMarkdownZh : defaultMarkdownEn,
   )
   const [activeTab, setActiveTab] = useState<TabType>('editor')
   const previewRef = useRef<HTMLDivElement>(null)

@@ -215,7 +215,9 @@ html.dark .streamdown pre span {
 }
 
 /* 导出时隐藏 CSS 伪元素行号（由 JS 添加真实元素替代） */
-[data-streamdown='code-block-body'] code > span[style*='--hide-line-number']::before {
+[data-streamdown='code-block-body']
+  code
+  > span[style*='--hide-line-number']::before {
   content: none !important;
 }
 
@@ -223,5 +225,3 @@ html.dark .streamdown pre span {
 [data-streamdown='blockquote'] {
   border-left-width: 4px;
 }
-
-

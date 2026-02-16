@@ -36,11 +36,15 @@ export const MarkdownPreview = forwardRef<HTMLDivElement, MarkdownPreviewProps>(
       <div className="h-full overflow-auto">
         <div
           ref={ref}
-          className="prose prose-neutral dark:prose-invert max-w-none bg-background p-4 md:p-6"
+          className="prose prose-neutral dark:prose-invert bg-background max-w-none p-4 md:p-6"
         >
           <Streamdown
             mode="static"
-            plugins={{ math: mathPlugin, code: codePlugin, mermaid: mermaidPlugin }}
+            plugins={{
+              math: mathPlugin,
+              code: codePlugin,
+              mermaid: mermaidPlugin,
+            }}
             rehypePlugins={rehypePlugins}
             linkSafety={{
               enabled: true,
@@ -58,5 +62,5 @@ export const MarkdownPreview = forwardRef<HTMLDivElement, MarkdownPreviewProps>(
         </div>
       </div>
     )
-  }
+  },
 )
